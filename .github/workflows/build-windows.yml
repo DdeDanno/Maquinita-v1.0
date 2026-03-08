@@ -1,39 +1,35 @@
-name: Build Electron App
+name: Build Electron Windows EXE
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        platform: [win32, darwin] # win32 = Windows, darwin = Mac
+  build-windows:
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install
+        working-directory: ./  # <-- tu package.json está en la raíz
 
-      - name: Package Electron App
+      - name: Package Electron app
         run: |
-          if [ "${{ matrix.platform }}" == "win32" ]; then
-            npx electron-packager . "ControlMaquina" --platform=win32 --arch=x64 --out=dist --overwrite --electron-version=25.3.1
-          else
-            npx electron-packager . "ControlMaquina" --platform=darwin --arch=arm64 --out=dist --overwrite --electron-version=25.3.1
-          fi
+          npx electron-packager . "ControlMaquina" --platform=win32 --arch=x64 --out=dist --overwrite --electron-version=25.3.1
+        working-directory: ./  # <-- asegura que tome la raíz
 
-      - name: Upload artifact
+      - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ControlMaquina-${{ matrix.platform }}
-          path: dist/*
+          name: ControlMaquina-win
+          path: dist/ControlMaquina-win32-x64/
