@@ -2,7 +2,7 @@ name: Build Windows EXE
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -10,22 +10,34 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repo
+      # 1. Clonar el repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      # 2. Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 20
 
+      # 3. Instalar dependencias
       - name: Install dependencies
         run: npm install
+        working-directory: Maquinita-v1.0
 
+      # 4. Instalar electron-packager
+      - name: Install electron-packager
+        run: npm install electron-packager --save-dev
+        working-directory: Maquinita-v1.0
+
+      # 5. Compilar la app a EXE Windows
       - name: Package Electron app
-        run: npx electron-packager . ControlMaquina --platform=win32 --arch=x64 --out=dist --overwrite
+        run: npx electron-packager . "ControlMaquina" --platform=win32 --arch=x64 --out=dist --overwrite
+        working-directory: Maquinita-v1.0
 
+      # 6. Subir el EXE como artifact
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ControlMaquina-Windows
-          path: dist/
+          name: ControlMaquina-Win
+          path: Maquinita-v1.0/dist/ControlMaquina-win32-x64/
