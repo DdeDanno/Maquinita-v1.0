@@ -23,8 +23,8 @@ jobs:
       - name: Package Electron app
         run: npx electron-packager . "ControlMaquina" --platform=win32 --arch=x64 --out=dist --overwrite
 
-      - name: Upload EXE artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload EXE
+        uses: actions/upload-artifact@v4
         with:
-          name: ControlMaquina-win-x64
+          name: ControlMaquina
           path: dist/
