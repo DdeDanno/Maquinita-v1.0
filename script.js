@@ -3,6 +3,93 @@ let META = 2800;
 const PREMIOS_ORDEN = ["vale","dulcesticker","chico","medio","bueno","alto","mayor"];
 let alertPremioMayorMostrado = false;
 
+// -------------------- MODALES --------------------
+function showModal(message, onConfirm=null) {
+    let modal = document.getElementById("modal");
+    if(!modal) {
+        modal = document.createElement("div");
+        modal.id = "modal";
+        modal.style = `
+            position: fixed; top: 0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); display:flex;
+            align-items:center; justify-content:center; z-index:1000;
+        `;
+        modal.innerHTML = `<div id="modalContent" style="background:#fff;padding:20px;border-radius:8px;min-width:300px;">
+            <div id="modalMsg"></div>
+            <button id="modalOk">OK</button>
+        </div>`;
+        document.body.appendChild(modal);
+        modal.querySelector("#modalOk").onclick = () => {
+            modal.style.display = "none";
+            if(onConfirm) onConfirm();
+        };
+    }
+    modal.querySelector("#modalMsg").innerHTML = message;
+    modal.style.display = "flex";
+}
+
+// Modal para pedir input
+function promptModal(message, defaultValue="", callback) {
+    let modal = document.getElementById("modal");
+    if(!modal) {
+        modal = document.createElement("div");
+        modal.id = "modal";
+        modal.style = `
+            position: fixed; top: 0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); display:flex;
+            align-items:center; justify-content:center; z-index:1000;
+        `;
+        modal.innerHTML = `<div id="modalContent" style="background:#fff;padding:20px;border-radius:8px;min-width:300px;">
+            <div id="modalMsg"></div>
+            <input id="modalInput" style="width:100%;margin-top:10px;" />
+            <div style="margin-top:10px; text-align:right;">
+                <button id="modalCancel">Cancelar</button>
+                <button id="modalOk">OK</button>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+    modal.querySelector("#modalMsg").innerHTML = message;
+    const input = modal.querySelector("#modalInput");
+    input.value = defaultValue;
+    modal.style.display = "flex";
+
+    modal.querySelector("#modalCancel").onclick = () => modal.style.display = "none";
+    modal.querySelector("#modalOk").onclick = () => {
+        const val = input.value;
+        modal.style.display = "none";
+        callback(val);
+    };
+}
+
+// Modal confirm
+function confirmModal(message, callback) {
+    let modal = document.getElementById("modal");
+    if(!modal) {
+        modal = document.createElement("div");
+        modal.id = "modal";
+        modal.style = `
+            position: fixed; top: 0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); display:flex;
+            align-items:center; justify-content:center; z-index:1000;
+        `;
+        modal.innerHTML = `<div id="modalContent" style="background:#fff;padding:20px;border-radius:8px;min-width:300px;">
+            <div id="modalMsg"></div>
+            <div style="margin-top:10px; text-align:right;">
+                <button id="modalCancel">No</button>
+                <button id="modalOk">Sí</button>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+    modal.querySelector("#modalMsg").innerHTML = message;
+    modal.style.display = "flex";
+
+    modal.querySelector("#modalCancel").onclick = () => { modal.style.display = "none"; callback(false); };
+    modal.querySelector("#modalOk").onclick = () => { modal.style.display = "none"; callback(true); };
+}
+
+// -------------------- CARGAR Y GUARDAR --------------------
 async function cargar() {
     const res = await fetch("/data");
     data = await res.json();
@@ -20,44 +107,38 @@ async function guardar(soloRender = false) {
     render();
 }
 
+// -------------------- FUNCIONES PRINCIPALES --------------------
 function registrarDinero() {
-    if (!data) { alert("Datos no cargados aún"); return; }
+    if (!data) { showModal("Datos no cargados aún"); return; }
     const val = Number(document.getElementById("dineroInput").value);
-    if (isNaN(val) || val <= 0) { alert("Ingrese un valor válido mayor a 0"); return; }
+    if (isNaN(val) || val <= 0) { showModal("Ingrese un valor válido mayor a 0"); return; }
 
     data.dinero.push(val);
     document.getElementById("dineroInput").value = "";
 
-    // Actualizamos el faltante del premio mayor
-    if (!data.faltantePremioMayor) {
-        data.faltantePremioMayor = META - val; // si no existía, iniciamos
-    } else {
-        data.faltantePremioMayor -= val; // restamos el dinero recién ingresado
-    }
+    if (!data.faltantePremioMayor) data.faltantePremioMayor = META - val;
+    else data.faltantePremioMayor -= val;
 
     guardar();
 }
 
 function salioPremio() {
-    if (!data) { alert("Datos no cargados aún"); return; }
+    if (!data) { showModal("Datos no cargados aún"); return; }
     const tipo = document.getElementById("premioTipo").value;
     const cant = Number(document.getElementById("cantidadPremio").value);
-    if (isNaN(cant) || cant <= 0) { alert("Ingrese una cantidad válida mayor a 0"); return; }
-    if (!data.premios[tipo]) { alert("Tipo de premio inválido"); return; }
+    if (isNaN(cant) || cant <= 0) { showModal("Ingrese una cantidad válida mayor a 0"); return; }
+    if (!data.premios[tipo]) { showModal("Tipo de premio inválido"); return; }
 
     const disponibles = data.premios[tipo].inicial - data.premios[tipo].salieron;
     const registrar = Math.min(cant, disponibles);
 
-    // Aumenta la cantidad de premios salidos
     data.premios[tipo].salieron += registrar;
 
-    // Sumar al faltante premio mayor el valor de los premios salidos
-    // (faltante = META - dinero recaudado + costo premios salidos)
     if (!data.faltantePremioMayor) data.faltantePremioMayor = META - data.dinero.reduce((a,b)=>a+b,0);
     data.faltantePremioMayor += registrar * data.premios[tipo].valor;
 
     document.getElementById("cantidadPremio").value = "";
-    guardar(true); // solo render
+    guardar(true);
 }
 
 function render() {
@@ -76,11 +157,8 @@ function render() {
     });
 
     const dinero = data.dinero.reduce((a,b)=>a+b,0);
-
-    // Faltante premio mayor: si no existe, se calcula, si existe, lo usamos
     let faltante = data.faltantePremioMayor ?? Math.max(0, META - dinero);
 
-    // Capsulas y alertas
     const totalInicialCapsulas = PREMIOS_ORDEN.reduce((acc, p) => acc + data.premios[p].inicial, 0);
     let aviso = "";
     if (capsulas < Math.floor(totalInicialCapsulas / 2)) aviso = "⚠ Rellenar cápsulas";
@@ -110,7 +188,7 @@ Dinero Dani: $${dineroDani} <br>
     document.getElementById("notas").innerHTML = `<div style="background-color:#fff8a6;padding:5px;">${notas}</div>`;
 
     if (faltante <= 0 && !alertPremioMayorMostrado) {
-        alert("🎉 FELICIDADES: Ingresar el premio mayor!");
+        showModal("🎉 FELICIDADES: Ingresar el premio mayor!");
         alertPremioMayorMostrado = true;
     }
 }
@@ -119,22 +197,31 @@ async function alertasResueltas() {
     for (let p in data.premios) {
         data.premios[p].salieron = 0;
     }
-    guardar(true); // solo render, no afecta dinero ni faltante
+    guardar(true);
 }
 
 async function reiniciarSistema() {
-    const nuevaMeta = prompt("Meta a recaudar", META);
-    if (nuevaMeta) META = Number(nuevaMeta);
+    promptModal("Meta a recaudar", META, (nuevaMeta) => {
+        if(!nuevaMeta) return;
+        META = Number(nuevaMeta);
 
-    if (!confirm("Esto reiniciará TODO el ciclo ¿Continuar?")) return;
+        confirmModal("Esto reiniciará TODO el ciclo ¿Continuar?", (ok) => {
+            if(!ok) return;
 
-    data.dinero = [];
-    data.faltantePremioMayor = undefined;
-    for (let p in data.premios) {
-        data.premios[p].salieron = 0;
-    }
-    alertPremioMayorMostrado = false;
-    guardar();
+            data.dinero = [];
+            data.faltantePremioMayor = undefined;
+            for(let p in data.premios) data.premios[p].salieron = 0;
+            alertPremioMayorMostrado = false;
+            guardar();
+        });
+    });
 }
 
-cargar();
+// -------------------- BOTONES --------------------
+document.addEventListener("DOMContentLoaded", () => {
+    cargar();
+    document.getElementById("btnReiniciar").onclick = reiniciarSistema;
+    document.getElementById("btnAlertasResueltas").onclick = alertasResueltas;
+    document.getElementById("btnRegistrarDinero").onclick = registrarDinero;
+    document.getElementById("btnSalioPremio").onclick = salioPremio;
+});

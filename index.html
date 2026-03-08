@@ -12,7 +12,7 @@
 <div class="panel">
     <h2>Registrar dinero</h2>
     <input id="dineroInput" type="number" placeholder="Ingresa cantidad">
-    <button onclick="registrarDinero()">Registrar</button>
+    <button id="btnRegistrarDinero">Registrar</button>
 </div>
 
 <div class="panel">
@@ -27,7 +27,7 @@
         <option value="mayor">Mayor</option>
     </select>
     <input id="cantidadPremio" type="number" placeholder="Cantidad">
-    <button onclick="salioPremio()">Registrar</button>
+    <button id="btnSalioPremio">Registrar</button>
 </div>
 
 <h2>Estado</h2>
@@ -49,10 +49,10 @@
 
 <h2>Alertas</h2>
 <div id="notas"></div>
-<button id="alertasBtn" class="yellowBtn" onclick="alertasResueltas()">Resolver Alertas</button>
+<button id="btnAlertasResueltas" class="yellowBtn">Resolver Alertas</button>
 <hr>
 
-<button class="resetBtn" onclick="reiniciarSistema()">Regresar al estado inicial</button>
+<button id="btnReiniciar" class="resetBtn">Regresar al estado inicial</button>
 
 <h2>Desglose de ganancias</h2>
 <div id="ganancias"></div>
