@@ -1,4 +1,4 @@
-name: Build Electron App for Windows
+name: Build Electron Windows EXE
 
 on:
   push:
@@ -11,25 +11,25 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
       - name: Install dependencies
         run: npm install
-
-      - name: Install electron-packager
-        run: npm install electron-packager --save-dev
+        working-directory: ./  # <-- tu package.json está en la raíz
 
       - name: Package Electron app
-        run: npx electron-packager . "ControlMaquina" --platform=win32 --arch=x64 --out=dist --overwrite
+        run: |
+          npx electron-packager . "ControlMaquina" --platform=win32 --arch=x64 --out=dist --overwrite --electron-version=25.3.1
+        working-directory: ./  # <-- asegura que tome la raíz
 
-      - name: Upload packaged app
+      - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ControlMaquina-Win64
+          name: ControlMaquina-win
           path: dist/ControlMaquina-win32-x64/
