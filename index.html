@@ -1,11 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title><!DOCTYPE html>
-        <html>
-        <head>
-        <title>Control Máquina</title>
+    <title>Control Máquina</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +11,7 @@
 
 <div class="panel">
     <h2>Registrar dinero</h2>
-    <input id="dineroInput" type="number">
+    <input id="dineroInput" type="number" placeholder="Ingresa cantidad">
     <button onclick="registrarDinero()">Registrar</button>
 </div>
 
@@ -29,7 +26,7 @@
         <option value="alto">Alto</option>
         <option value="mayor">Mayor</option>
     </select>
-    <input id="cantidadPremio" type="number">
+    <input id="cantidadPremio" type="number" placeholder="Cantidad">
     <button onclick="salioPremio()">Registrar</button>
 </div>
 
@@ -51,22 +48,15 @@
 </table>
 
 <h2>Alertas</h2>
-<div id="alertas" style="background-color: #fff3b0; padding:5px;"></div>
-<button id="alertasBtn" onclick="alertasResueltas()" style="background-color: yellow;">Resolver Alertas</button>
+<div id="notas"></div>
+<button id="alertasBtn" class="yellowBtn" onclick="alertasResueltas()">Resolver Alertas</button>
 <hr>
 
-<button class="resetBtn" onclick="reiniciarSistema()">
-    Regresar al estado inicial
-</button>
+<button class="resetBtn" onclick="reiniciarSistema()">Regresar al estado inicial</button>
 
 <h2>Desglose de ganancias</h2>
 <div id="ganancias"></div>
 
 <script src="script.js"></script>
-</body>
-</html></title>
-</head>
-<body>
-
 </body>
 </html>

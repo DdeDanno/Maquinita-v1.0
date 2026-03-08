@@ -1,6 +1,67 @@
-body { font-family: sans-serif; margin: 20px; }
-.panel { margin-bottom: 20px; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
-#alertas { font-weight: bold; }
-button.resetBtn { background-color: red; color: white; padding: 5px 10px; border: none; cursor: pointer; }
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f2f2f2;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+.panel {
+    background: #fff;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+input, select, button {
+    margin: 5px 0;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    margin-bottom: 10px;
+}
+
+table th, table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+}
+
+.yellowBtn {
+    background-color: #fff7a8;
+    color: #333;
+    margin-top: 5px;
+}
+
+.resetBtn {
+    background-color: #f44336;
+    color: white;
+    padding: 8px 12px;
+    margin-top: 10px;
+}
+
+#notas div {
+    background-color: #fff7a8;
+    padding: 5px;
+    border-radius: 4px;
+}

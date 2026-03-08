@@ -1,108 +1,102 @@
-let data
-let META = 2800
+let data;
+let META = 2800;
+const PREMIOS_ORDEN = ["vale","dulcesticker","chico","medio","bueno","alto","mayor"];
+let alertPremioMayorMostrado = false;
 
-// Orden de los premios para mostrar en la tabla
-const PREMIOS_ORDEN = ["vale","dulcesticker","chico","medio","bueno","alto","mayor"]
-let premioMayorAlertShown = false // para mostrar alerta una sola vez
-
-async function cargar(){
-    const res = await fetch("/data")
-    data = await res.json()
-    if(data.meta) META = data.meta
-    render()
+async function cargar() {
+    const res = await fetch("/data");
+    data = await res.json();
+    if (data.meta) META = data.meta;
+    render();
 }
 
-async function guardar(){
-    data.meta = META
-    await fetch("/save",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(data)
-    })
-    render()
+async function guardar(soloRender = false) {
+    if (!soloRender) data.meta = META;
+    await fetch("/save", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+    render();
 }
 
-function registrarDinero(){
-    if(!data){ alert("Datos no cargados aún"); return }
-    const val = Number(document.getElementById("dineroInput").value)
-    if(isNaN(val) || val <= 0){ alert("Ingrese un valor válido mayor a 0"); return }
-    data.dinero.push(val)
-    document.getElementById("dineroInput").value = ""
-    guardar()
+function registrarDinero() {
+    if (!data) { alert("Datos no cargados aún"); return; }
+    const val = Number(document.getElementById("dineroInput").value);
+    if (isNaN(val) || val <= 0) { alert("Ingrese un valor válido mayor a 0"); return; }
+
+    data.dinero.push(val);
+    document.getElementById("dineroInput").value = "";
+
+    // Actualizamos el faltante del premio mayor
+    if (!data.faltantePremioMayor) {
+        data.faltantePremioMayor = META - val; // si no existía, iniciamos
+    } else {
+        data.faltantePremioMayor -= val; // restamos el dinero recién ingresado
+    }
+
+    guardar();
 }
 
-function salioPremio(){
-    if(!data){ alert("Datos no cargados aún"); return }
-    const tipo = document.getElementById("premioTipo").value
-    const cant = Number(document.getElementById("cantidadPremio").value)
-    if(isNaN(cant) || cant <= 0){ alert("Ingrese una cantidad válida mayor a 0"); return }
-    if(!data.premios[tipo]){ alert("Tipo de premio inválido"); return }
+function salioPremio() {
+    if (!data) { alert("Datos no cargados aún"); return; }
+    const tipo = document.getElementById("premioTipo").value;
+    const cant = Number(document.getElementById("cantidadPremio").value);
+    if (isNaN(cant) || cant <= 0) { alert("Ingrese una cantidad válida mayor a 0"); return; }
+    if (!data.premios[tipo]) { alert("Tipo de premio inválido"); return; }
 
-    const disponibles = data.premios[tipo].inicial - data.premios[tipo].salieron
-    const registrar = Math.min(cant, disponibles)
-    data.premios[tipo].salieron += registrar
-    document.getElementById("cantidadPremio").value = ""
-    guardar()
+    const disponibles = data.premios[tipo].inicial - data.premios[tipo].salieron;
+    const registrar = Math.min(cant, disponibles);
+
+    // Aumenta la cantidad de premios salidos
+    data.premios[tipo].salieron += registrar;
+
+    // Sumar al faltante premio mayor el valor de los premios salidos
+    // (faltante = META - dinero recaudado + costo premios salidos)
+    if (!data.faltantePremioMayor) data.faltantePremioMayor = META - data.dinero.reduce((a,b)=>a+b,0);
+    data.faltantePremioMayor += registrar * data.premios[tipo].valor;
+
+    document.getElementById("cantidadPremio").value = "";
+    guardar(true); // solo render
 }
 
-function render(){
-    if(!data) return
+function render() {
+    const tbody = document.querySelector("#tabla tbody");
+    tbody.innerHTML = "";
 
-    let dinero = data.dinero.reduce((a,b)=>a+b,0)
-    let costoPremios = 0
-    let capsulas = 0
-    let notas = ""
-    let ganancias = ""
-
-    const tbody = document.querySelector("#tabla tbody")
-    tbody.innerHTML = ""
+    let notas = "";
+    let capsulas = 0;
 
     PREMIOS_ORDEN.forEach(p => {
-        const pr = data.premios[p]
-        const restantes = pr.inicial - pr.salieron
-        capsulas += restantes
-        costoPremios += pr.salieron * pr.valor
-        if(pr.salieron > 0){
-            notas += `Rellenar ${p} ${pr.salieron} veces<br>`
-        }
-        tbody.innerHTML += `
-<tr>
-<td>${p}</td>
-<td>${pr.valor}</td>
-<td>${pr.inicial}</td>
-<td>${pr.salieron}</td>
-<td>${restantes}</td>
-</tr>`
-    })
+        const pr = data.premios[p];
+        const restantes = pr.inicial - pr.salieron;
+        capsulas += restantes;
+        if (pr.salieron > 0) notas += `Rellenar ${p} ${pr.salieron} veces<br>`;
+        tbody.innerHTML += `<tr><td>${p}</td><td>${pr.valor}</td><td>${pr.inicial}</td><td>${pr.salieron}</td><td>${restantes}</td></tr>`;
+    });
 
-    const efectivo = dinero - costoPremios
-    const faltante = META - efectivo
+    const dinero = data.dinero.reduce((a,b)=>a+b,0);
 
-    // Alertas de cápsulas
-    const totalInicialCapsulas = PREMIOS_ORDEN.reduce((acc,p)=>acc+data.premios[p].inicial,0)
-    let aviso = ""
-    if(capsulas < Math.floor(totalInicialCapsulas/2)) aviso="⚠ Rellenar cápsulas"
-    if(capsulas > totalInicialCapsulas) aviso="❌ ERROR cápsula extra"
+    // Faltante premio mayor: si no existe, se calcula, si existe, lo usamos
+    let faltante = data.faltantePremioMayor ?? Math.max(0, META - dinero);
+
+    // Capsulas y alertas
+    const totalInicialCapsulas = PREMIOS_ORDEN.reduce((acc, p) => acc + data.premios[p].inicial, 0);
+    let aviso = "";
+    if (capsulas < Math.floor(totalInicialCapsulas / 2)) aviso = "⚠ Rellenar cápsulas";
+    if (capsulas > totalInicialCapsulas) aviso = "❌ ERROR cápsula extra";
 
     document.getElementById("estado").innerHTML = `
 Dinero recaudado: $${dinero} <br>
 Faltante premio mayor: $${faltante} <br>
 Cápsulas en máquina: ${capsulas} <br>
 <b>${aviso}</b>
-`
+`;
 
-    // Mostrar alerta de premio mayor solo una vez
-    if(faltante <= 0 && !premioMayorAlertShown){
-        premioMayorAlertShown = true
-        alert("🎉 FELICIDADES: Ingresar el premio mayor")
-    }
+    const dineroServicio = (dinero*0.2).toFixed(2);
+    const dineroMigda = (dinero*0.4).toFixed(2);
+    const dineroDani = (dinero*0.4).toFixed(2);
 
-    // Mini desglose de dinero
-    const dineroServicio = (dinero*0.2).toFixed(2)
-    const dineroMigda = (dinero*0.4).toFixed(2)
-    const dineroDani = (dinero*0.4).toFixed(2)
-
-    document.getElementById("alertas").innerHTML = notas
     document.getElementById("ganancias").innerHTML = `
 <hr>
 <div>
@@ -111,25 +105,36 @@ Dinero para servicio: $${dineroServicio} <br>
 Dinero Migda: $${dineroMigda} <br>
 Dinero Dani: $${dineroDani} <br>
 </div>
-`
-}
+`;
 
-cargar()
+    document.getElementById("notas").innerHTML = `<div style="background-color:#fff8a6;padding:5px;">${notas}</div>`;
 
-async function alertasResueltas(){
-    for(let p in data.premios){
-        data.premios[p].salieron = 0
+    if (faltante <= 0 && !alertPremioMayorMostrado) {
+        alert("🎉 FELICIDADES: Ingresar el premio mayor!");
+        alertPremioMayorMostrado = true;
     }
-    await guardar()
 }
 
-async function reiniciarSistema(){
-    const nuevaMeta = prompt("Meta a recaudar", META)
-    if(nuevaMeta) META = Number(nuevaMeta)
-    if(!confirm("Esto reiniciará TODO el ciclo ¿Continuar?")) return
-    data.dinero = []
-    for(let p in data.premios){
-        data.premios[p].salieron = 0
+async function alertasResueltas() {
+    for (let p in data.premios) {
+        data.premios[p].salieron = 0;
     }
-    await guardar()
+    guardar(true); // solo render, no afecta dinero ni faltante
 }
+
+async function reiniciarSistema() {
+    const nuevaMeta = prompt("Meta a recaudar", META);
+    if (nuevaMeta) META = Number(nuevaMeta);
+
+    if (!confirm("Esto reiniciará TODO el ciclo ¿Continuar?")) return;
+
+    data.dinero = [];
+    data.faltantePremioMayor = undefined;
+    for (let p in data.premios) {
+        data.premios[p].salieron = 0;
+    }
+    alertPremioMayorMostrado = false;
+    guardar();
+}
+
+cargar();
