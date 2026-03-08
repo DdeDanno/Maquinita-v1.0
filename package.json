@@ -1,19 +1,16 @@
 {
   "name": "maquinita-v1.0",
   "version": "1.0.0",
-  "description": "",
-  "main": "script.js",
+  "description": "Control de máquina de premios",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "electron": "^25.3.1",
     "electron-packager": "^17.1.2"
   }
 }
