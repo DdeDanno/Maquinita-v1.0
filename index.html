@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html>
+        <head>
+        <title>Control Máquina</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Control de Máquina</h1>
+
+<div class="panel">
+    <h2>Registrar dinero</h2>
+    <input id="dineroInput" type="number">
+    <button onclick="registrarDinero()">Registrar</button>
+</div>
+
+<div class="panel">
+    <h2>Registrar premio salido</h2>
+    <select id="premioTipo">
+        <option value="vale">Vale</option>
+        <option value="dulcesticker">Dulce Sticker</option>
+        <option value="chico">Chico</option>
+        <option value="medio">Medio</option>
+        <option value="bueno">Bueno</option>
+        <option value="alto">Alto</option>
+        <option value="mayor">Mayor</option>
+    </select>
+    <input id="cantidadPremio" type="number">
+    <button onclick="salioPremio()">Registrar</button>
+</div>
+
+<h2>Estado</h2>
+<div id="estado"></div>
+
+<h2>Tabla de premios</h2>
+<table id="tabla">
+    <thead>
+    <tr>
+        <th>Premio</th>
+        <th>Valor</th>
+        <th>Inicial</th>
+        <th>Salieron</th>
+        <th>Restantes</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<h2>Alertas</h2>
+<div id="alertas" style="background-color: #fff3b0; padding:5px;"></div>
+<button id="alertasBtn" onclick="alertasResueltas()" style="background-color: yellow;">Resolver Alertas</button>
+<hr>
+
+<button class="resetBtn" onclick="reiniciarSistema()">
+    Regresar al estado inicial
+</button>
+
+<h2>Desglose de ganancias</h2>
+<div id="ganancias"></div>
+
+<script src="script.js"></script>
+</body>
+</html></title>
+</head>
+<body>
+
+</body>
+</html>
